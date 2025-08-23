@@ -22,5 +22,6 @@ if (NOT raylib_FOUND)
   endif()
 endif()
 
+add_subdirectory(lib)
 add_executable(asteroids main.c)
-target_link_libraries(asteroids PUBLIC raylib)
+target_link_libraries(asteroids PUBLIC lib raylib)
