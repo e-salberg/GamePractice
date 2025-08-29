@@ -2,28 +2,29 @@
 #include "bullets.h"
 #include "common.h"
 #include "raylib.h"
+#include "settings.h"
 #include <math.h>
 
 Triangle player;
 int health;
 bool isInvulnerable = false;
 
-static Color color = PURPLE;
+extern GameColors colors;
+
 static Color invulnerableColor = RED;
 static float lastHitTime;
 static float lastFireTime;
 static float lastInvulnerableFlashTime;
 static bool isVisible;
 
-Vector2 getCurrentDirection();
-void MovePlayer(float deltaTime);
-void RotatePlayer(float angle);
+Vector2 getCenter(void);
+Vector2 getCurrentDirection(void);
+void movePlayer(float deltaTime);
+void rotatePlayer(float angle);
 
 void InitPlayer() {
   player = (Triangle){(Vector2){0, 0}, (Vector2){-10, 30}, (Vector2){10, 30}};
-
-  Vector2 center = {(player.v1.x + player.v2.x + player.v3.x) / 3,
-                    (player.v1.y + player.v2.y + player.v3.y) / 3};
+  Vector2 center = getCenter();
 
   player.v1.x += (GetScreenWidth() / 2.f) - center.x;
   player.v1.y += (GetScreenHeight() / 2.f) - center.y;
@@ -45,18 +46,42 @@ void InitPlayer() {
 void UpdatePlayer(float deltaTime) {
   float currentTime = GetTime();
   if (IsKeyDown(KEY_W)) {
-    MovePlayer(deltaTime * MOVE_SPEED);
+    movePlayer(deltaTime * MOVE_SPEED);
   }
   if (IsKeyDown(KEY_S)) {
-    MovePlayer(deltaTime * -MOVE_SPEED);
+    movePlayer(deltaTime * -MOVE_SPEED);
   }
   if (IsKeyDown(KEY_A)) {
-    RotatePlayer(deltaTime * -TURN_RATE);
+    rotatePlayer(deltaTime * -TURN_RATE);
   }
   if (IsKeyDown(KEY_D)) {
-    RotatePlayer(deltaTime * TURN_RATE);
+    rotatePlayer(deltaTime * TURN_RATE);
   }
-  if (IsKeyDown(KEY_J) && lastFireTime + FIRE_RATE <= currentTime) {
+  float wrapAdjustmentX = 0;
+  if (player.v1.x <= 0 && player.v2.x <= 0 && player.v3.x <= 0) {
+    wrapAdjustmentX = GetScreenWidth();
+  } else if (player.v1.x >= GetScreenWidth() &&
+             player.v2.x >= GetScreenWidth() &&
+             player.v3.x >= GetScreenWidth()) {
+    wrapAdjustmentX = -GetScreenWidth();
+  }
+  player.v1.x += wrapAdjustmentX;
+  player.v2.x += wrapAdjustmentX;
+  player.v3.x += wrapAdjustmentX;
+
+  float wrapAdjustmentY = 0;
+  if (player.v1.y <= 0 && player.v2.y <= 0 && player.v3.y <= 0) {
+    wrapAdjustmentY = GetScreenHeight();
+  } else if (player.v1.y >= GetScreenHeight() &&
+             player.v2.y >= GetScreenHeight() &&
+             player.v3.y >= GetScreenHeight()) {
+    wrapAdjustmentY = -GetScreenHeight();
+  }
+  player.v1.y += wrapAdjustmentY;
+  player.v2.y += wrapAdjustmentY;
+  player.v3.y += wrapAdjustmentY;
+
+  if (IsKeyDown(KEY_SPACE) && lastFireTime + FIRE_RATE <= currentTime) {
     FireBullet(getCurrentDirection(), player.v1);
     lastFireTime = currentTime;
   }
@@ -74,18 +99,12 @@ void UpdatePlayer(float deltaTime) {
 void DrawPlayer() {
   if (isVisible) {
     DrawTriangleLines(player.v1, player.v2, player.v3,
-                      isInvulnerable ? invulnerableColor : color);
-
-    Vector2 center = {(player.v1.x + player.v2.x + player.v3.x) / 3,
-                      (player.v1.y + player.v2.y + player.v3.y) / 3};
-    DrawPixelV(center, color);
+                      isInvulnerable ? invulnerableColor
+                                     : colors.options[colors.idx]);
   }
-
-  DrawText(TextFormat("Health: %i", health), GetScreenWidth() / 6, 10, 30,
-           color);
 }
 
-Vector2 RotatePoint(Vector2 center, Vector2 point, float angle) {
+Vector2 rotatePoint(Vector2 center, Vector2 point, float angle) {
   float translatedX = point.x - center.x;
   float translatedY = point.y - center.y;
 
@@ -98,16 +117,16 @@ Vector2 RotatePoint(Vector2 center, Vector2 point, float angle) {
   return rotatedPoint;
 }
 
-void RotatePlayer(float angle) {
+void rotatePlayer(float angle) {
   Vector2 center = {(player.v1.x + player.v2.x + player.v3.x) / 3,
                     (player.v1.y + player.v2.y + player.v3.y) / 3};
 
-  player.v1 = RotatePoint(center, player.v1, angle);
-  player.v2 = RotatePoint(center, player.v2, angle);
-  player.v3 = RotatePoint(center, player.v3, angle);
+  player.v1 = rotatePoint(center, player.v1, angle);
+  player.v2 = rotatePoint(center, player.v2, angle);
+  player.v3 = rotatePoint(center, player.v3, angle);
 }
 
-void MovePlayer(float amount) {
+void movePlayer(float amount) {
   Vector2 direction = getCurrentDirection();
 
   player.v1 = (Vector2){player.v1.x + direction.x * amount,
@@ -118,12 +137,6 @@ void MovePlayer(float amount) {
                         player.v3.y + direction.y * amount};
 }
 
-Vector2 getCurrentDirection() {
-  Vector2 center = {(player.v1.x + player.v2.x + player.v3.x) / 3,
-                    (player.v1.y + player.v2.y + player.v3.y) / 3};
-  return normalize((Vector2){player.v1.x - center.x, player.v1.y - center.y});
-}
-
 void playerTakeDamage() {
   if (isInvulnerable) {
     return;
@@ -131,4 +144,14 @@ void playerTakeDamage() {
   isInvulnerable = true;
   lastHitTime = GetTime();
   health--;
+}
+
+Vector2 getCurrentDirection() {
+  Vector2 center = getCenter();
+  return normalize((Vector2){player.v1.x - center.x, player.v1.y - center.y});
+}
+
+Vector2 getCenter() {
+  return (Vector2){(player.v1.x + player.v2.x + player.v3.x) / 3,
+                   (player.v1.y + player.v2.y + player.v3.y) / 3};
 }

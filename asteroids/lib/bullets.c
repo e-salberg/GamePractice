@@ -1,8 +1,11 @@
 #include "bullets.h"
 #include "raylib.h"
+#include "settings.h"
 
 Bullet bullets[MAX_BULLETS] = {0};
 float bulletRadius = BULLET_RADIUS;
+
+extern GameColors colors;
 
 void InitBullets(void) {
   for (int i = 0; i < MAX_BULLETS; i++) {
@@ -47,6 +50,6 @@ void DrawBullets(void) {
     if (!bullets[i].isActive) {
       continue;
     }
-    DrawCircleV(bullets[i].position, bulletRadius, PURPLE);
+    DrawCircleV(bullets[i].position, bulletRadius, colors.options[colors.idx]);
   }
 }

@@ -1,10 +1,11 @@
 #include "asteroids.h"
 #include "common.h"
 #include "raylib.h"
+#include "settings.h"
 #include "stdlib.h"
 
 Asteroid asteroids[MAX_ASTEROIDS] = {0};
-static Color color = PURPLE;
+extern GameColors colors;
 
 static int asteroidRadii[3] = {10, 15, 25};
 
@@ -102,7 +103,7 @@ void DrawAsteroids(void) {
       continue;
     }
     DrawCircleLinesV(asteroids[i].position, asteroidRadii[asteroids[i].size],
-                     color);
+                     colors.options[colors.idx]);
   }
 }
 
