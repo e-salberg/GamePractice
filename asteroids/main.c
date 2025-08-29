@@ -22,7 +22,7 @@ char *titleText = "SPACE ROCKS";
 
 int points[3] = {100, 50, 20};
 int score = 0;
-int timer;
+float timer = START_TIME;
 
 extern Triangle player;
 extern int health;
@@ -43,6 +43,10 @@ int main() {
   while (!WindowShouldClose()) {
     Update();
     Draw();
+
+    if (IsKeyPressed(KEY_TAB)) {
+      ToggleColors();
+    }
   }
   CloseWindow();
 }
@@ -51,7 +55,7 @@ void Update() {
   float deltaTime = GetFrameTime();
   switch (state) {
   case TITLE:
-    if (IsKeyDown(KEY_ENTER)) {
+    if (IsKeyPressed(KEY_ENTER)) {
       InitPlayer();
       InitBullets();
       ResetAsteroids();
@@ -86,6 +90,11 @@ void Update() {
       }
     }
 
+    timer -= deltaTime;
+    if (timer <= 0) {
+      timer = 0;
+      state = GAMEOVER;
+    }
     if (health <= 0) {
       state = GAMEOVER;
     }
@@ -100,10 +109,6 @@ void Update() {
       timer = START_TIME;
     }
     break;
-  }
-
-  if (IsKeyPressed(KEY_TAB)) {
-    ToggleColors();
   }
 }
 
