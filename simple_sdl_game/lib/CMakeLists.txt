@@ -1,0 +1,8 @@
+file (GLOB sources CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/lib/*.c")
+
+file (GLOB headers CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/*.h")
+
+add_library(lib STATIC ${sources} ${headers})
+
+target_include_directories(lib PUBLIC ${PROJECT_SOURCE_DIR}/include) 
+target_link_libraries(lib PRIVATE SDL3_image::SDL3_image SDL3_ttf::SDL3_ttf SDL3::SDL3)
