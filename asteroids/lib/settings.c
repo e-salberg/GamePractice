@@ -5,7 +5,7 @@ GameColors colors = {
     .amount = 8,
     .options = {WHITE, LIGHTGRAY, PINK, YELLOW, GREEN, SKYBLUE, PURPLE, BEIGE}};
 
-void ToggleColors() {
+void CycleColors() {
   colors.idx++;
   if (colors.idx >= colors.amount) {
     colors.idx = 0;

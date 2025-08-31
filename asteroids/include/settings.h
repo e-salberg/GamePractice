@@ -8,4 +8,4 @@ typedef struct {
   Color options[];
 } GameColors;
 
-void ToggleColors(void);
+void CycleColors(void);
