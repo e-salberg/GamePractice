@@ -1,0 +1,9 @@
+[submodule "simple_sdl_game/vendored/SDL"]
+	path = simple_sdl_game/vendored/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "simple_sdl_game/vendored/SDL_image"]
+	path = simple_sdl_game/vendored/SDL_image
+	url = https://github.com/libsdl-org/SDL_image.git
+[submodule "simple_sdl_game/vendored/SDL_ttf"]
+	path = simple_sdl_game/vendored/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
